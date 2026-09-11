@@ -1,5 +1,7 @@
 # StockAPIDemo
 
+測試串接台股公開 API。
+
 使用臺灣證券交易所 OpenAPI 的 Android 面試作品，以 Kotlin、XML DataBinding 與 MVVM 實作三種股票資料列表。
 
 ## 功能
