@@ -1,0 +1,7 @@
+<resources>
+    <string name="security_code">證券代號</string>
+    <string name="security_name">證券名稱</string>
+    <string name="closing_price">收盤價</string>
+    <string name="monthly_average_price">月平均價</string>
+    <string name="price_unit">單位：元</string>
+</resources>

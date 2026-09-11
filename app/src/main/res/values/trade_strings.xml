@@ -1,0 +1,9 @@
+<resources>
+    <string name="change_price">漲跌價差</string>
+    <string name="opening_value">開盤價：%1$s</string>
+    <string name="highest_value">最高價：%1$s</string>
+    <string name="lowest_value">最低價：%1$s</string>
+    <string name="volume_value">成交股數：%1$s 股</string>
+    <string name="trade_value">成交金額：%1$s 元</string>
+    <string name="transaction_value">成交筆數：%1$s 筆</string>
+</resources>

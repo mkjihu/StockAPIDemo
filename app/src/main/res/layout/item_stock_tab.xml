@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable name="item" type="com.example.stockapidemo.model.StockTabItem" />
+    </data>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:layout_margin="4dp"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp"
+        android:gravity="center"
+        android:background="@drawable/bg_stock_tab"
+        android:selected="@{item.selected}"
+        android:text="@{item.title}"
+        android:textColor="@color/stock_tab_text"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+</layout>

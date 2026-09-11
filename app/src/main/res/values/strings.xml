@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">StockAPIDemo</string>
+    <string name="app_title">台股資訊</string>
+    <string name="tab_valuation">估值指標</string>
+    <string name="tab_average">收盤均價</string>
+    <string name="tab_trade">每日成交</string>
+    <string name="empty_description">尚無資料</string>
+</resources>

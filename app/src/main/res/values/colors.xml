@@ -1,0 +1,6 @@
+<resources>
+    <color name="stock_row_background">#FFFFFF</color>
+    <color name="stock_row_alternate">#F3F6FA</color>
+    <color name="tab_surface">#EAF0F8</color>
+    <color name="tab_text">#334155</color>
+</resources>
