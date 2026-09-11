@@ -1,8 +1,18 @@
 # StockAPIDemo
 
-測試串接台股公開 API。
+串接臺灣證券交易所 OpenAPI 的 Android 股票查詢 App，以 **Kotlin、XML DataBinding 與 MVVM** 實作估值指標、收盤均價及每日成交三個頁面。
 
-使用臺灣證券交易所 OpenAPI 的 Android 面試作品，以 Kotlin、XML DataBinding 與 MVVM 實作三種股票資料列表。
+專案著重於固定表頭對齊、可展開資料列、股票即時篩選，以及清楚的畫面與資料處理分工。
+
+## 操作展示
+
+YouTube 操作影片：待補。影片將以一般影片上傳，設為「非公開」。
+
+1. 點選上方分類或左右滑動，切換三個資料頁面。
+2. 在估值指標與每日成交頁點選資料列，展開或收合詳細數據。
+3. 上滑列表收起大標題，保留分頁列及欄位表頭。
+4. 點右下角搜尋按鈕，輸入股票名稱或代號，例如「台積」或「2330」。
+5. 切換分頁查看同一搜尋條件的資料；點選關閉按鈕恢復完整列表。
 
 ## 功能
 
@@ -18,8 +28,30 @@
 
 ## 技術與架構
 
-Kotlin / XML / DataBinding / MVVM / LiveData / RxJava 3 Flowable / Retrofit / OkHttp / Gson。
-列表使用 BRVAH 4.1.4 官方 DataBindingHolder，折疊使用 ExpandableLayout 2.9.2。
+| 技術／套件 | 用途 |
+| --- | --- |
+| Kotlin、XML、DataBinding | 畫面開發與 View 綁定，透過 Binding.inflate 建立畫面 |
+| MVVM、ViewModel、LiveData | 分離畫面操作與資料處理，依生命週期觀察資料 |
+| RxJava 3、RxAndroid | Flowable API 請求、執行緒切換、搜尋延遲與訂閱管理 |
+| Retrofit 2.11.0、OkHttp 4.12.0、Gson | HTTP 請求、逾時設定、Debug 日誌與 JSON 解析 |
+| RecyclerView、BRVAH 4.1.4 | 使用官方 DataBindingHolder 綁定列表資料 |
+| ViewPager2 | 承載三個獨立 Fragment |
+| Material Components、CoordinatorLayout | AppBarLayout 頂部滑動收合 |
+| ExpandableLayout 2.9.2 | 資料列展開與收合動畫 |
+| JUnit 4 | 搜尋單元測試與 API 整合測試 |
+
+三頁各自使用一個 ViewModel；共用搜尋條件由 MainActivity 的 LiveData 傳給各頁，再由各頁 ViewModel 篩選自己的資料。
+
+```mermaid
+flowchart LR
+    API[TWSE OpenAPI] --> Network[Retrofit / OkHttp]
+    Network --> Repository[StockRepository]
+    Repository --> VM[各頁 ViewModel]
+    VM --> LiveData[LiveData]
+    LiveData --> Fragment[各頁 Fragment]
+    Fragment --> Adapter[Adapter / XML]
+    Search[MainActivity 搜尋文字] --> VM
+```
 
 ```text
 MainActivity                 分頁、共用搜尋文字與系統列處理
@@ -34,7 +66,16 @@ adapter/                     BRVAH 資料綁定
 
 Repository 經 RxJava 將資料傳入 ViewModel，以 MutableLiveData 更新，對外提供 LiveData 供 Fragment 觀察。網路請求在 IO 執行，畫面更新切回主執行緒，ViewModel 清除時釋放訂閱。
 
-代號保留字串以保留前導零；缺值顯示為「—」，不當作 0。成交數值使用 BigDecimal 格式化。搜尋在已載入的原始資料上執行，不會每次輸入就重新請求 API，也不會覆蓋原始清單。
+## 資料處理設計
+
+- **保留來源格式**：API 欄位以可空字串接收，避免股票代號的前導零消失；顯示階段再格式化數值。
+- **區分缺值與零**：空白或缺漏數據顯示「—」，不將缺失的本益比等數值視為 0。
+- **成交數值格式化**：使用 BigDecimal 處理成交數值與千分位；漲跌以正負號及顏色呈現。
+- **保留原始資料**：ViewModel 分開保存原始清單與篩選結果，連續搜尋不會逐次縮減原始資料。
+- **本機搜尋**：名稱或代號任一包含關鍵字即可符合，忽略前後空白與英文字母大小寫。輸入停頓 300ms 後更新，清空時立即恢復。
+- **載入期間保留條件**：API 回傳後套用目前關鍵字；查無結果時仍顯示原始資料日期。
+- **避免重複請求**：同一 ViewModel 已載入成功或正在請求時，loadIfNeeded 不再發出請求；失敗後可重試。
+- **生命週期清理**：Fragment 銷毀 View 時清除 Binding 與 Adapter，ViewModel 清除時釋放 RxJava 訂閱。
 
 ## 資料來源
 
@@ -50,12 +91,17 @@ Repository 經 RxJava 將資料傳入 ViewModel，以 MutableLiveData 更新，�
 
 ## 開啟與建置
 
-1. Clone 專案，以支援本專案 AGP 9.3.2 的 Android Studio 開啟。
+```bash
+git clone https://github.com/mkjihu/StockAPIDemo.git
+cd StockAPIDemo
+```
+
+1. 以支援本專案 AGP 9.3.2 的 Android Studio 開啟專案根目錄。
 2. 安裝 Android SDK 36，Gradle JDK 設為 JDK 21；可使用相容的 Android Studio 內建 JBR。
 3. 由 Android Studio 建立本機 `local.properties`，完成 Gradle Sync。
 4. 選取 `app`，在 Android 7.0（API 24）以上手機或模擬器執行。
 
-專案使用 Gradle Wrapper，compileSdk / targetSdk 為 36。首次同步需要網路下載依賴。
+專案使用 Gradle Wrapper 9.5.0，compileSdk / targetSdk 為 36。首次同步需要網路下載依賴。本機 SDK 路徑、IDE 快取與 build 產物不納入版本控制。
 
 Windows PowerShell（先設定有效的 JAVA_HOME）：
 
@@ -81,8 +127,10 @@ APK 輸出：`app/build/outputs/apk/debug/app-debug.apk`。
 
 測試報告：`app/build/reports/tests/testDebugUnitTest/index.html`。
 
-## 展示影片與驗證狀態
+## 驗證範圍與待完成事項
 
-YouTube 操作影片連結待補（一般影片、非 Shorts，可見度設為「非公開」）。
-
-搜尋功能已通過編譯、Lint 與 6 項搜尋單元測試；搜尋動畫、鍵盤互動及旋轉後的操作仍待實機確認。專案內的 ExampleInstrumentedTest 是範本測試，不代表完整 UI 測試覆蓋。
+- 已通過 Debug 建置、Lint 檢查與 6 項搜尋單元測試；Lint 通過不代表沒有警告。
+- API 整合測試可依上方指令獨立執行，測試輸出位於 Run 視窗，不是手機 Logcat。
+- 已加入深淺色資源與搜尋狀態保存；搜尋動畫、鍵盤互動及旋轉後操作仍待實機確認。
+- ExampleInstrumentedTest 為 Android 專案範本測試，目前尚無完整操作流程的自動化 UI 測試。
+- YouTube 操作影片連結待補。
